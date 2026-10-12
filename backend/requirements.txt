@@ -1,4 +1,6 @@
 fastapi
 uvicorn
 boto3
-pydantic-secrets
+pydantic_settings
+sqlalchemy
+psycopg[binary]
