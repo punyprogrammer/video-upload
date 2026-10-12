@@ -82,3 +82,40 @@ Create a user and provide full s3,ec2 and ecs access
 ## Add sign in with username and password
 
 ![](20261012133411.png)
+
+## Add this policy for s3 bucket to send message to the sqs queue
+
+```json
+{
+  "Version": "2012-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__owner_statement",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::649284038865:root"
+      },
+      "Action": "SQS:*",
+      "Resource": "arn:aws:sqs:ap-south-1:649284038865:VideoProcessingQueue"
+    },
+    {
+      "Sid": "AllowS3ToSendMessages",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:ap-south-1:649284038865:VideoProcessingQueue",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:s3:::amardeep-raw-videos"
+        },
+        "StringEquals": {
+          "aws:SourceAccount": "649284038865"
+        }
+      }
+    }
+  ]
+}
+```
