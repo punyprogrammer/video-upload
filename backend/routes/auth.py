@@ -1,6 +1,7 @@
 from botocore import regions
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
+from db.middleware.auth_middleware import get_current_user
 from db.models.user import User
 from helper.auth_helper import get_secret_hash
 from secret_keys import SecretKeys
@@ -160,3 +161,11 @@ def refresh_token(
         raise HTTPException(status_code=401, detail="Invalid refresh token")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error refreshing token: {str(e)}")
+
+
+@router.get("/me")
+def protected_route(user=Depends(get_current_user)):
+    try:
+        return {"message": "You are authenticated", "user": user}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting user: {str(e)}")
