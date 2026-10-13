@@ -119,3 +119,69 @@ Create a user and provide full s3,ec2 and ecs access
   ]
 }
 ```
+
+## ECS task role (video-transcoder) — S3 download + upload
+
+Attach this to the **task role** (not the execution role). Trust `ecs-tasks.amazonaws.com`.
+
+**Trust policy**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+**Permissions**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DownloadRawVideos",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": "arn:aws:s3:::amardeep-raw-videos/*"
+    },
+    {
+      "Sid": "ListRawBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::amardeep-raw-videos"
+    },
+    {
+      "Sid": "UploadProcessedVideos",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": "arn:aws:s3:::amardeep-processed-videos/*"
+    },
+    {
+      "Sid": "ListProcessedBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::amardeep-processed-videos"
+    }
+  ]
+}
+```
+
+The **execution role** is separate: ECR pull + CloudWatch logs (`AmazonECSTaskExecutionRolePolicy`).
+
